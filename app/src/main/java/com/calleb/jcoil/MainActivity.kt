@@ -25,6 +25,8 @@ import android.widget.Toast
 import androidx.core.graphics.drawable.toBitmap
 import coil.Coil
 import coil.ImageLoader
+import coil.ImageLoaderBuilder
+import coil.ImageLoaderFactory
 import coil.api.load
 import coil.util.CoilUtils
 import com.google.firebase.ml.vision.FirebaseVision
@@ -46,16 +48,17 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        Coil.setDefaultImageLoader {
-            ImageLoader(this) {
-                crossfade(true)
-                okHttpClient {
-                    OkHttpClient.Builder()
-                        .cache(CoilUtils.createDefaultCache(applicationContext))
-                        .build()
-                }
+        Coil.setImageLoader(object : ImageLoaderFactory {
+            override fun newImageLoader(): ImageLoader {
+                val okHttpClient = OkHttpClient.Builder()
+                    .cache(CoilUtils.createDefaultCache(applicationContext))
+                    .build()
+                return ImageLoaderBuilder(this@MainActivity)
+                    .crossfade(true)
+                    .okHttpClient(okHttpClient)
+                    .build()
             }
-        }
+        })
 
         imgDownloaded.setImageDrawable(getDrawable(R.drawable.jcole))
         progressBar.visibility = View.GONE
